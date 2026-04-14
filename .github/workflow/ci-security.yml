@@ -1,0 +1,47 @@
+name: CI/CD Security and Testing
+
+on:
+  push:
+    [cite_start]branches: [ "main", "develop" ] 
+  pull_request:
+    [cite_start]branches: [ "main", "develop" ] 
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        [cite_start]uses: actions/checkout@v4 [cite: 12]
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest tests
+        [cite_start]run: npm run test
+
+  sast-analysis:
+    name: Security Scan (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    [cite_start]if: github.ref == 'refs/heads/main' 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          [cite_start]languages: 'javascript-typescript' 
+
+      - name: Perform CodeQL Analysis
+        [cite_start]uses: github/codeql-action/analyze@v3 
